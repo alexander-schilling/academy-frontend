@@ -1,17 +1,63 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { FormControl } from "../components/FormControl";
+import axios from "axios";
+import { useAppDispatch } from "../app/hooks";
+import { setUserData } from "../store/user";
+import { toast } from "react-hot-toast";
+
+interface UserRegisterForm {
+  username: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  passwordConfirmation: string;
+}
 
 export const UserRegisterPage = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm();
+  } = useForm<UserRegisterForm>();
 
-  const onSubmit = (data: any) => console.log(data);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSubmit = (data: any) => {
+    setIsLoading(true);
+
+    const promise = axios.post(
+      `${process.env.REACT_APP_BACKEND_URL}/users/register`,
+      data
+    );
+
+    toast.promise(promise, {
+      loading: "Registrando usuario...",
+      success: "¡Usuario registrado con éxito!",
+      error: (err) =>
+        `Error al registrar usuario (${
+          err.response?.data?.error || err.toString()
+        })`,
+    });
+
+    promise
+      .then((response) => {
+        const userData = response.data;
+
+        dispatch(setUserData(userData));
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
 
   return (
     <div className="container mx-auto py-10">
@@ -19,7 +65,7 @@ export const UserRegisterPage = () => {
         <div className="flex flex-col items-center">
           <div className="prose prose-md text-center mb-6">
             <h1>Bienvenid@</h1>
-            <p>¿Preparado para potenciar tu carrera?</p>
+            <p>¿Preparad@ para potenciar tu carrera?</p>
           </div>
 
           <FormControl
@@ -86,6 +132,7 @@ export const UserRegisterPage = () => {
             type="submit"
             className="btn btn-primary w-full max-w-xs mb-2"
             value="Registrarse"
+            disabled={isLoading}
           />
           <div className="prose prose-sm">
             ¿Ya tienes una cuenta? <Link to="/users/login">Inicia sesión</Link>
