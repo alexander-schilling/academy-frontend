@@ -1,16 +1,53 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { FormControl } from "../components/FormControl";
+import axios from "axios";
+import { useAppDispatch } from "../app/hooks";
+import toast from "react-hot-toast";
+import { setUserData } from "../store/user";
 
 export const UserLoginPage = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data: any) => console.log(data);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSubmit = (data: any) => {
+    setIsLoading(true);
+
+    const promise = axios.post(
+      `${process.env.REACT_APP_BACKEND_URL}/users/login`,
+      data
+    );
+
+    toast.promise(promise, {
+      loading: "Iniciando sesión...",
+      success: "¡Inicio de sesión exitoso!",
+      error: (err) =>
+        `Error al iniciar sesión (${
+          err.response?.data?.error || err.toString()
+        })`,
+    });
+
+    promise
+      .then((response) => {
+        dispatch(setUserData(response.data));
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
 
   return (
     <div className="container mx-auto py-10">
@@ -39,11 +76,13 @@ export const UserLoginPage = () => {
             errors={errors.password}
           />
 
-          <input
+          <button
             type="submit"
             className="btn btn-primary w-full max-w-xs mb-2"
-            value="Iniciar sesión"
-          />
+            disabled={isLoading}
+          >
+            Iniciar sesión
+          </button>
           <div className="prose prose-sm">
             ¿No tienes una cuenta? <Link to="/users/register">Regístrate</Link>
           </div>
