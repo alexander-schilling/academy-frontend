@@ -4,9 +4,11 @@ import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { UserDropdownComponent } from "./UserDropdownComponent";
+import { useAppSelector } from "../../app/hooks";
 
 const NavbarComponent = () => {
-  const isLoggedIn = false;
+  const user = useAppSelector((state) => state.user.data);
+  const isLoggedIn = typeof user.token === "string";
 
   const getNavbarStart = () => {
     return (
