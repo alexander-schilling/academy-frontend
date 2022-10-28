@@ -1,9 +1,21 @@
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router";
+import { useAppDispatch } from "../../app/hooks";
+import { logoutUser } from "../../store/user";
 
 export const UserDropdownComponent = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const logout = () => {
+    toast.success("Cerraste sesión con éxito");
+    dispatch(logoutUser());
+    navigate("/");
+  };
+
   return (
     <div className="dropdown dropdown-end">
       <label tabIndex={0} className="btn btn-ghost btn-circle avatar p-3">
@@ -14,7 +26,7 @@ export const UserDropdownComponent = () => {
         className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52"
       >
         <li>
-          <Link to="/users/logout">Cerrar sesión</Link>
+          <div onClick={logout}>Cerrar sesión</div>
         </li>
       </ul>
     </div>
