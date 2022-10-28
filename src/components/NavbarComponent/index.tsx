@@ -8,7 +8,7 @@ import { useAppSelector } from "../../app/hooks";
 
 const NavbarComponent = () => {
   const user = useAppSelector((state) => state.user.data);
-  const isLoggedIn = typeof user.token === "string";
+  const isLoggedIn = user !== null;
 
   const getNavbarStart = () => {
     return (
